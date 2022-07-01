@@ -7,6 +7,12 @@ from .utils import SingletonType
 class Pydis(SingletonType):
     _data: Dict[str, Tuple[datetime, Any]] = {}
 
+    def __init__(self, default_timeout: Optional[int] = None):
+        """
+        :param default_timeout: 全局的timeout，如果在设置key没有指定timeout的话，就会应用该timeout
+        """
+        self.default_timeout = default_timeout
+
     @staticmethod
     def _expired(expired_date: Union[None, datetime], now: datetime) -> bool:
         return now > expired_date
@@ -27,7 +33,10 @@ class Pydis(SingletonType):
 
     def set(self, key: str, value: Any, timeout: Optional[int] = None) -> None:
         if timeout is None:
-            expired_date = None
+            if self.default_timeout is None:
+                expired_date = None
+            else:
+                expired_date = datetime.now() + timedelta(seconds=self.default_timeout)
         else:
             if timeout <= 0:
                 raise ValueError("Make sure timeout is an integer greater than 0 ")
