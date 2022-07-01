@@ -1,6 +1,11 @@
 # pydis
 Based on python's dict bottom layer, it implements management similar to redis interface
 
+## install
+```shell
+pip install pydictdis==0.1.0
+```
+
 ## Usage
 
 params
