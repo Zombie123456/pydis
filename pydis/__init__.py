@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
-from typing import Dict, Tuple, Any, Optional, Union
+from typing import Dict, Tuple, Any, Optional, Union, Iterable
 
-from utils import SingletonType
+from .utils import SingletonType
 
 
 class Pydis(SingletonType):
@@ -78,3 +78,12 @@ class Pydis(SingletonType):
         value -= 1
         self._set(key, (expired_date, value))
         return value
+
+    def keys(self) -> Iterable:
+        now = datetime.now()
+        for key, value in self._data.items():
+            expired_date, _ = value
+            if self._is_forever_key(expired_date):
+                yield key
+            elif not self._expired(expired_date, now):
+                yield key

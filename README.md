@@ -26,4 +26,10 @@ print(manager.get("key3"))  # 3
 manager.decr("key3")
 
 print(manager.get("key3"))  # 2
+
+# keys
+manager = Pydis()
+manager.set("key1", "value1")
+print(list(manager.keys()))  # ["keys"]
+
 ```
