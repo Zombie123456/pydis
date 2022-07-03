@@ -1,9 +1,11 @@
 # pydis
 Based on python's dict bottom layer, it implements management similar to redis interface
 
+If you want to manage memory like redis, but don't want to introduce as many services as redis, you can use pydis,
+Of course, pydis is completely implemented based on python's dict, and only has the basic functions of reids. Please evaluate this carefully before using it.
 ## install
 ```shell
-pip install pydictdis==0.1.0
+pip install pydictdis
 ```
 
 ## Usage
