@@ -19,7 +19,10 @@ from pydis import Pydis
 manager = Pydis()
 
 manager.set("key1", "value1")
-manager.get("key1")
+manager.get("key1")  # value1
+
+manager.delete("key1")
+manager.get("key1")  # None
 ```
 
 ### ttl usage
