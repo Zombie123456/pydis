@@ -51,7 +51,7 @@ class Pydis(metaclass=SingletonType):
             return -2
         return value.ttl()
 
-    def incr(self, key: str, amplitude: int) -> int:
+    def incr(self, key: str, amplitude: int = 1) -> int:
         try:
             value = self._data[key]
         except KeyError:
@@ -59,7 +59,7 @@ class Pydis(metaclass=SingletonType):
         value.incr(amplitude)
         return value.value
 
-    def decr(self, key: str, amplitude: int) -> int:
+    def decr(self, key: str, amplitude: int = 1) -> int:
         try:
             value = self._data[key]
         except KeyError:
