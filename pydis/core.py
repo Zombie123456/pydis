@@ -24,13 +24,23 @@ class Pydis(metaclass=SingletonType):
             return None
         return value.value
 
+    def set_nx(self, key: str, value: Any, timeout: Optional[int] = None) -> bool:
+        """
+        没有key的时候设置key，返回True
+        有key的时候不做任何操作，返回False
+        """
+        if self.get(key) is not None:
+            return False
+        self._set(key, value, timeout)
+        return True
+
     def set(self, key: str, value: Any, timeout: Optional[int] = None) -> None:
+        self._set(key, value, timeout)
+
+    def _set(self, key: str, value: Any, timeout: Optional[int] = None) -> None:
         if timeout is None:
             timeout = self.default_timeout
         value = Value(value, timeout=timeout)
-        self._set(key, value)
-
-    def _set(self, key: str, value: Value) -> None:
         self._data[key] = value
 
     def delete(self, key: str) -> None:

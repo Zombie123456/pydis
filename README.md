@@ -58,7 +58,16 @@ print(manager.get("key3"))  # 2
 from pydis import Pydis
 manager = Pydis()
 
-manager = Pydis()
 manager.set("key1", "value1")
 print(list(manager.keys()))  # ["keys"]
+```
+
+### set_nx 
+```python3
+from pydis import Pydis
+manager = Pydis()
+
+manager.set_nx('key1', 'value')
+manager.set_nx('key1', 'value1')
+manager.get('key1')  # value
 ```
