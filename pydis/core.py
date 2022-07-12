@@ -1,4 +1,5 @@
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
+from datetime import datetime
 
 from .utils import SingletonType
 from .value import Value
@@ -6,7 +7,14 @@ from .value import Value
 
 class Pydis(metaclass=SingletonType):
     _data: Dict[str, Value] = {}
-    _expire: List[float] = []
+    """
+    这里我想的是
+    每一次 set 都加入到这个队列
+    clean 时从队头开始，对于每一个 key 都检查一遍是否超时
+    直到现在的 datetime > 队头的到期时间
+    但是 set 太多占用空间就会变大
+    """
+    _expire: List[Tuple[str, datetime]] = []
 
     def __init__(self, default_timeout: Optional[int] = None):
         """
@@ -14,13 +22,24 @@ class Pydis(metaclass=SingletonType):
         """
         self.default_timeout = default_timeout
 
+    def clean(self) -> None:
+        while len(self._expire):
+            if (self._expire[0][1] - datetime.now()) >= 0:
+                self.ttl(self._expire[0][0])
+                self._expire.pop()
+            else:
+                break
+
+    def clean_force(self) -> None:
+        self.keys()
+
     def get(self, key: str) -> Any:
         try:
             value = self._data[key]
         except KeyError:
             return None
 
-        if self.ttl(key) == -2: return None
+        self.clean()
         return value.value
 
     def set_nx(self, key: str, value: Any, timeout: Optional[int] = None) -> bool:
@@ -40,6 +59,7 @@ class Pydis(metaclass=SingletonType):
         if timeout is None:
             timeout = self.default_timeout
         value = Value(value, timeout=timeout)
+        self._expire.push((key, value.expire_to()))
         self._data[key] = value
 
     def delete(self, key: str) -> None:
@@ -80,6 +100,3 @@ class Pydis(metaclass=SingletonType):
             if self.ttl(key) != -2:
                 keys_dict.append(key)
         return keys_dict
-
-    def clean(self) -> None:
-        self.keys()
