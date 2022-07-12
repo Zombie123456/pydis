@@ -1,10 +1,13 @@
 # pydis
+
 Based on python's dict bottom layer, it implements management similar to redis interface
 
 If you want to manage memory like redis, but don't want to introduce as many services as redis, you can use pydis,
-Of course, pydis is completely implemented based on python's dict, and only has the basic functions of reids. Please evaluate this carefully before using it.
+Of course, pydis is completely implemented based on python's dict, and only has the basic functions of redis. Please evaluate this carefully before using it.
+
 ## install
-```shell
+
+```bash
 pip install pydictdis
 ```
 
@@ -12,10 +15,10 @@ pip install pydictdis
 
 params
 
-- default_timeout : 全局的timeout，如果在设置key没有指定timeout的话，就会应用该timeout
-
+- default_timeout : 全局的 timeout，如果在设置 key 没有指定 timeout 的话，就会应用该 timeout
 
 ### simple usage
+
 ```python3
 from pydis import Pydis
 manager = Pydis()
@@ -28,6 +31,7 @@ manager.get("key1")  # None
 ```
 
 ### ttl usage
+
 ```python3
 from pydis import Pydis
 manager = Pydis()
@@ -37,8 +41,8 @@ print(manager.ttl("key2"))
 manager.get("key2") # return None, because key2 already expired
 ```
 
-
 ### incr and decr usage
+
 ```python3
 from pydis import Pydis
 manager = Pydis()
@@ -54,15 +58,17 @@ print(manager.get("key3"))  # 2
 ```
 
 ### keys usage
+
 ```python3
 from pydis import Pydis
 manager = Pydis()
 
 manager.set("key1", "value1")
-print(list(manager.keys()))  # ["keys"]
+print(list(manager.keys()))  # ["key1"]
 ```
 
-### set_nx 
+### set_nx
+
 ```python3
 from pydis import Pydis
 manager = Pydis()
