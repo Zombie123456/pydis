@@ -6,6 +6,7 @@ from .value import Value
 
 class Pydis(metaclass=SingletonType):
     _data: Dict[str, Value] = {}
+    _expire: List[float] = []
 
     def __init__(self, default_timeout: Optional[int] = None):
         """
@@ -19,9 +20,7 @@ class Pydis(metaclass=SingletonType):
         except KeyError:
             return None
 
-        if value.is_expired():
-            self.delete(key)
-            return None
+        if self.ttl(key) == -2: return None
         return value.value
 
     def set_nx(self, key: str, value: Any, timeout: Optional[int] = None) -> bool:
@@ -70,16 +69,17 @@ class Pydis(metaclass=SingletonType):
         return value.value
 
     def incr(self, key: str, amplitude: int = 1) -> int:
-        self._incr(key, amplitude, 'incr')
+        return self._incr(key, amplitude, 'incr')
 
     def decr(self, key: str, amplitude: int = 1) -> int:
         return self._incr(key, -amplitude, 'decr')
 
     def keys(self) -> List:
         keys_dict: List = []
-        for key, value in self._data.items():
-            if value.is_expired():
-                self.delete(key)
-                continue
-            keys_dict.append(key)
+        for key, _ in self._data.items():
+            if self.ttl(key) != -2:
+                keys_dict.append(key)
         return keys_dict
+
+    def clean(self) -> None:
+        self.keys()

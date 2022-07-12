@@ -15,7 +15,7 @@ class Value:
             expired_to = None
         else:
             if timeout <= 0:
-                raise ValueError("Make sure timeout is an integer greater than 0 ")
+                raise ValueError("Make sure timeout is an float greater than 0 ")
             forever = False
             expired_to = datetime.now() + timedelta(seconds=timeout)
         return forever, expired_to
