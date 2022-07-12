@@ -1,15 +1,15 @@
-from typing import Any, Union
+from typing import Any, Optional, Tuple
 from datetime import datetime, timedelta
 
 
 class Value:
-    def __init__(self, value: Any, timeout: Union[float | None]):
+    def __init__(self, value: Any, timeout: Optional[float]):
         self.value = value
         self.forever_key, self.expired_to = self.__load_expired_to(timeout)
         self.can_incr = isinstance(value, int)
 
     @staticmethod
-    def __load_expired_to(timeout: Union[float | None]) -> (bool, Union[datetime | None]):
+    def __load_expired_to(timeout: Optional[float]) -> Tuple[bool, Optional[datetime]]:
         if timeout is None:
             forever = True
             expired_to = None
@@ -31,17 +31,18 @@ class Value:
             return False
         return self.expired_to < datetime.now()
 
-    def ttl(self):
+    def ttl(self) -> int:
         if self.forever_key:
             return -1
         return (self.expired_to - datetime.now()).seconds
 
-    def incr(self, amplitude: int):
+    def _incr(self, amplitude: int, func: str) -> None:
         if not self.can_incr:
-            raise ValueError(f"type: {type(self.value)} no support incr")
+            raise ValueError(f"type: {type(self.value)} no support {func}")
         self.value += amplitude
 
-    def decr(self, amplitude: int):
-        if not self.can_incr:
-            raise ValueError(f"type: {type(self.value)} no support decr")
-        self.value -= amplitude
+    def incr(self, amplitude: int) -> None:
+        self._incr(amplitude, 'incr')
+
+    def decr(self, amplitude: int) -> None:
+        self._incr(-amplitude, 'decr')
