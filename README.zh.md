@@ -2,26 +2,26 @@
 
 ![[](./LICENSE)](https://img.shields.io/github/license/Zombie123456/pydis) ![](https://img.shields.io/pypi/v/pydictdis) ![](https://img.shields.io/badge/python-%3E%3D3.6-blue)
 
-English | [简体中文](./README.zh.md)
+[English](./README.md) | 简体中文
 
 Based on python's dict bottom layer, it implements management similar to redis interface
 
 If you want to manage memory like redis, but don't want to introduce as many services as redis, you can use pydis,
 Of course, pydis is completely implemented based on python's dict, and only has the basic functions of redis. Please evaluate this carefully before using it.
 
-## install
+## 安装
 
 ```bash
 pip install pydictdis
 ```
 
-## Usage
+## 用例
 
 params
 
 - default_timeout : 全局的 timeout，如果在设置 key 没有指定 timeout 的话，就会应用该 timeout
 
-### simple usage
+### 简单用例
 
 ```python3
 from pydis import Pydis
@@ -34,7 +34,7 @@ manager.delete("key1")
 manager.get("key1")  # None
 ```
 
-### ttl usage
+### ttl 用例
 
 ```python3
 from pydis import Pydis
@@ -45,7 +45,7 @@ print(manager.ttl("key2"))
 manager.get("key2") # return None, because key2 already expired
 ```
 
-### incr and decr usage
+### incr 和 decr 用例
 
 ```python3
 from pydis import Pydis
@@ -61,7 +61,7 @@ manager.decr("key3")
 print(manager.get("key3"))  # 2
 ```
 
-### keys usage
+### keys 用例
 
 ```python3
 from pydis import Pydis
@@ -71,7 +71,7 @@ manager.set("key1", "value1")
 print(list(manager.keys()))  # ["key1"]
 ```
 
-### set_nx
+### set_nx 用例
 
 ```python3
 from pydis import Pydis
