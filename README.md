@@ -1,6 +1,6 @@
 # pydis
 
-![[](./LICENSE)](https://img.shields.io/github/license/Zombie123456/pydis) ![](https://img.shields.io/pypi/v/pydictdis) ![](https://img.shields.io/badge/python-%3E%3D3.6-blue)
+![[](./LICENSE)](https://img.shields.io/github/license/Zombie123456/pydis) ![PyPI-version](https://img.shields.io/pypi/v/pydictdis) ![Python-version](https://img.shields.io/badge/python-%3E%3D3.6-blue)
 
 English | [简体中文](./README.zh.md)
 
