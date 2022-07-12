@@ -59,7 +59,7 @@ class Pydis(metaclass=SingletonType):
         if timeout is None:
             timeout = self.default_timeout
         value = Value(value, timeout=timeout)
-        self._expire.push((key, value.expire_to()))
+        if not value.forever_key: self._expire.push((key, value.expire_to))
         self._data[key] = value
 
     def delete(self, key: str) -> None:
