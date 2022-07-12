@@ -36,13 +36,7 @@ class Value:
             return -1
         return (self.expired_to - datetime.now()).seconds
 
-    def _incr(self, amplitude: int, func: str) -> None:
+    def incr(self, amplitude: int, func: str) -> None:
         if not self.can_incr:
             raise ValueError(f"type: {type(self.value)} no support {func}")
         self.value += amplitude
-
-    def incr(self, amplitude: int) -> None:
-        self._incr(amplitude, 'incr')
-
-    def decr(self, amplitude: int) -> None:
-        self._incr(-amplitude, 'decr')

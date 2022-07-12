@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, Iterable
+from typing import Dict, Any, Optional, List
 
 from .utils import SingletonType
 from .value import Value
@@ -61,24 +61,25 @@ class Pydis(metaclass=SingletonType):
             return -2
         return value.ttl()
 
-    def incr(self, key: str, amplitude: int = 1) -> int:
+    def _incr(self, key: str, amplitude: int, func: str) -> int:
         try:
             value = self._data[key]
         except KeyError:
             raise KeyError(f'key: {key} does not exists')
-        value.incr(amplitude)
+        value.incr(amplitude, func)
         return value.value
+
+    def incr(self, key: str, amplitude: int = 1) -> int:
+        self._incr(key, amplitude, 'incr')
 
     def decr(self, key: str, amplitude: int = 1) -> int:
-        try:
-            value = self._data[key]
-        except KeyError:
-            raise KeyError(f'key: {key} does not exists')
-        value.decr(amplitude)
-        return value.value
+        return self._incr(key, -amplitude, 'decr')
 
-    def keys(self) -> Iterable:
+    def keys(self) -> List:
+        keys_dict: List = []
         for key, value in self._data.items():
             if value.is_expired():
                 self.delete(key)
-            yield key
+                continue
+            keys_dict.append(key)
+        return keys_dict
