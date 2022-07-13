@@ -6,11 +6,19 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v2
 
-      - name: Run mdl
-        uses: actionshub/markdownlint@main
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+
+      - name: Install markdownlint-cli2
+        run: npm install markdownlint-cli2 --global
+
+      - uses: actions/checkout@v3
+
+      - name: Lint and fix markdown
+        run: markdownlint-cli2 --lint "**.md"
 
       - name: AutoCorrect
         uses: huacnlee/autocorrect-action@main
