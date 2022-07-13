@@ -39,6 +39,10 @@ class Pydis(metaclass=SingletonType):
         except KeyError:
             return None
 
+        if value.is_expired():
+            self.delete(key)
+            self.clean()
+            return None
         self.clean()
         return value.value
 
@@ -59,7 +63,8 @@ class Pydis(metaclass=SingletonType):
         if timeout is None:
             timeout = self.default_timeout
         value = Value(value, timeout=timeout)
-        if not value.forever_key: self._expire.push((key, value.expire_to))
+        if not value.forever_key:
+            self._expire.append((key, value.expire_to))
         self._data[key] = value
 
     def delete(self, key: str) -> None:
@@ -96,7 +101,9 @@ class Pydis(metaclass=SingletonType):
 
     def keys(self) -> List:
         keys_dict: List = []
-        for key, _ in self._data.items():
-            if self.ttl(key) != -2:
+        for key, value in self._data.items():
+            if not value.is_expired():
                 keys_dict.append(key)
+            else:
+                self.delete(key)
         return keys_dict
