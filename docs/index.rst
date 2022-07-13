@@ -10,6 +10,9 @@ Welcome to pydis's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   introduction.rst
+   installation.rst
+   usage.rst
 
 
 Indices and tables
