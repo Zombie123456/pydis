@@ -1,1 +1,1 @@
-from .core import Pydis
+from .core import Pydis  # noqa: F401

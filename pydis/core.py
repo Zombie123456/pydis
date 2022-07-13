@@ -22,7 +22,7 @@ class Pydis(metaclass=SingletonType):
         """
         self.default_timeout = default_timeout
 
-    def clean(self) -> None:
+    def _clean(self) -> None:
         while len(self._expire):
             if (self._expire[0][1] - datetime.now()) >= 0:
                 self.ttl(self._expire[0][0])
@@ -30,8 +30,10 @@ class Pydis(metaclass=SingletonType):
             else:
                 break
 
-    def clean_force(self) -> None:
-        self.keys()
+    def clean(self) -> None:
+        for key, value in self._data.items():
+            if value.is_expired():
+                self.delete(key)
 
     def get(self, key: str) -> Any:
         try:
@@ -41,9 +43,9 @@ class Pydis(metaclass=SingletonType):
 
         if value.is_expired():
             self.delete(key)
-            self.clean()
+            # self.clean()
             return None
-        self.clean()
+        # self.clean()
         return value.value
 
     def set_nx(self, key: str, value: Any, timeout: Optional[int] = None) -> bool:
