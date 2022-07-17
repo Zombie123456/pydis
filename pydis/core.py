@@ -1,4 +1,5 @@
-from typing import Dict, Any, Optional, Iterable
+from typing import Dict, Any, Optional, List, Tuple
+from datetime import datetime
 
 from .utils import SingletonType
 from .value import Value
@@ -6,12 +7,33 @@ from .value import Value
 
 class Pydis(metaclass=SingletonType):
     _data: Dict[str, Value] = {}
+    """
+    这里我想的是
+    每一次 set 都加入到这个队列
+    clean 时从队头开始，对于每一个 key 都检查一遍是否超时
+    直到现在的 datetime > 队头的到期时间
+    但是 set 太多占用空间就会变大
+    """
+    _expire: List[Tuple[str, datetime]] = []
 
     def __init__(self, default_timeout: Optional[int] = None):
         """
         :param default_timeout: 全局的timeout，如果在设置key没有指定timeout的话，就会应用该timeout
         """
         self.default_timeout = default_timeout
+
+    def _clean(self) -> None:
+        while len(self._expire):
+            if (self._expire[0][1] - datetime.now()) >= 0:
+                self.ttl(self._expire[0][0])
+                self._expire.pop()
+            else:
+                break
+
+    def clean(self) -> None:
+        for key, value in self._data.items():
+            if value.is_expired():
+                self.delete(key)
 
     def get(self, key: str) -> Any:
         try:
@@ -21,7 +43,9 @@ class Pydis(metaclass=SingletonType):
 
         if value.is_expired():
             self.delete(key)
+            # self.clean()
             return None
+        # self.clean()
         return value.value
 
     def set_nx(self, key: str, value: Any, timeout: Optional[int] = None) -> bool:
@@ -41,6 +65,8 @@ class Pydis(metaclass=SingletonType):
         if timeout is None:
             timeout = self.default_timeout
         value = Value(value, timeout=timeout)
+        if not value.forever_key:
+            self._expire.append((key, value.expire_to))
         self._data[key] = value
 
     def delete(self, key: str) -> None:
@@ -61,24 +87,25 @@ class Pydis(metaclass=SingletonType):
             return -2
         return value.ttl()
 
-    def incr(self, key: str, amplitude: int = 1) -> int:
+    def _incr(self, key: str, amplitude: int, func: str) -> int:
         try:
             value = self._data[key]
         except KeyError:
             raise KeyError(f'key: {key} does not exists')
-        value.incr(amplitude)
+        value.incr(amplitude, func)
         return value.value
+
+    def incr(self, key: str, amplitude: int = 1) -> int:
+        return self._incr(key, amplitude, 'incr')
 
     def decr(self, key: str, amplitude: int = 1) -> int:
-        try:
-            value = self._data[key]
-        except KeyError:
-            raise KeyError(f'key: {key} does not exists')
-        value.decr(amplitude)
-        return value.value
+        return self._incr(key, -amplitude, 'decr')
 
-    def keys(self) -> Iterable:
+    def keys(self) -> List:
+        keys_dict: List = []
         for key, value in self._data.items():
-            if value.is_expired():
+            if not value.is_expired():
+                keys_dict.append(key)
+            else:
                 self.delete(key)
-            yield key
+        return keys_dict
