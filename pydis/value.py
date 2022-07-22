@@ -1,3 +1,4 @@
+import pickle
 from typing import Any, Optional, Tuple
 from datetime import datetime, timedelta
 
@@ -6,7 +7,15 @@ class Value:
     def __init__(self, value: Any, timeout: Optional[float]):
         self.is_forever, self.expired_to = self.__load_expired_to(timeout)
         self.can_incr = isinstance(value, int)
-        self.value = value
+        self._value = pickle.dumps(value)
+
+    @property
+    def value(self):
+        return pickle.loads(self._value)
+
+    @value.setter
+    def value(self, v):
+        self._value = pickle.dumps(v)
 
     @staticmethod
     def __load_expired_to(timeout: Optional[float]) -> Tuple[bool, Optional[datetime]]:

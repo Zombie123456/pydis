@@ -1,6 +1,7 @@
 import threading
 
 from .exceptions import NotFound, ExpiredError
+from .value import Value
 
 
 class SingletonType(type):
@@ -16,9 +17,9 @@ class SingletonType(type):
 
 
 class Data(dict):
-    def __getitem__(self, key):
+    def __getitem__(self, key: str):
         try:
-            value = super().__getitem__(key)
+            value: Value = super().__getitem__(key)
             if value.is_expired():
                 self.pop(key)
                 raise ExpiredError(key)

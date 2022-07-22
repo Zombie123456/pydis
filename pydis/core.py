@@ -100,5 +100,5 @@ class Pydis(metaclass=SingletonType):
     def is_empty(self) -> bool:
         return bool(self._data)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._data)
