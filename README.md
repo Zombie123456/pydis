@@ -19,12 +19,14 @@ pip install pydictdis
 
 params
 
-- default_timeout : 全局的 timeout，如果在设置 key 没有指定 timeout 的话，就会应用该 timeout
+- default_timeout : global timeout
 
 ### simple usage
 
 ```python3
 from pydis import Pydis
+
+
 manager = Pydis()
 
 manager.set("key1", "value1")
@@ -38,6 +40,8 @@ manager.get("key1")  # None
 
 ```python3
 from pydis import Pydis
+
+
 manager = Pydis()
 manager.set("key2", "value2", timeout=10)
 print(manager.ttl("key2"))
@@ -49,6 +53,8 @@ manager.get("key2") # return None, because key2 already expired
 
 ```python3
 from pydis import Pydis
+
+
 manager = Pydis()
 
 manager.set("key3", 0)
@@ -65,6 +71,8 @@ print(manager.get("key3"))  # 2
 
 ```python3
 from pydis import Pydis
+
+
 manager = Pydis()
 
 manager.set("key1", "value1")
@@ -75,9 +83,38 @@ print(list(manager.keys()))  # ["key1"]
 
 ```python3
 from pydis import Pydis
+
+
 manager = Pydis()
 
 manager.set_nx('key1', 'value')
 manager.set_nx('key1', 'value1')
 manager.get('key1')  # value
+```
+
+### clean
+
+```python3
+from pydis import Pydis
+
+
+manager = Pydis()
+
+manager.set('key', 'value')
+manager.set('key1', 'value1', timeout=1)
+# after one seconds
+manager.clean() # only have key in pydis, key1 already deleted
+
+```
+
+### force_clean
+
+```python3
+from pydis import Pydis
+
+
+manager = Pydis()
+manager.set('key', 'value')
+manager.set('key1', 'value1', timeout=1)
+manager.force_clean()  # will delete all key
 ```
