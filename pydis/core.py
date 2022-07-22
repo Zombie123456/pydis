@@ -27,7 +27,7 @@ class Pydis(metaclass=SingletonType):
         :return:
         """
         expired_keys = [key for key, value in self._data.items() if value.is_expired()]
-        _ = [self.delete(expired_key) for expired_key in expired_keys]
+        self.delete_many(expired_keys)
 
     def get(self, key: str) -> Any:
         try:
@@ -56,7 +56,10 @@ class Pydis(metaclass=SingletonType):
         self._data[key] = value
 
     def delete(self, key: str) -> None:
-        self._data.pop(key, None)
+        try:
+            del self._data[key]
+        except (NotFound, ExpiredError):
+            return None
 
     def ttl(self, key: str) -> int:
         """
@@ -81,6 +84,17 @@ class Pydis(metaclass=SingletonType):
     def decr(self, key: str, amplitude: int = 1) -> int:
         return self._incr(key, -amplitude, 'decr')
 
+    def set_many(self, data: dict, timeout: Optional[int] = None) -> None:
+        if timeout is None:
+            timeout = self.default_timeout
+
+        for key, value in data.items():
+            data[key] = Value(value, timeout)
+        self._data.update(data)
+
+    def delete_many(self, keys: [str]) -> None:
+        _ = [self.delete(key) for key in keys]
+
     def keys(self) -> List:
         """
         以列表形式返回所有的key
@@ -94,7 +108,7 @@ class Pydis(metaclass=SingletonType):
             else:
                 keys.append(key)
 
-        _ = [self.delete(expired_key) for expired_key in expired_keys]
+        self.delete_many(expired_keys)
         return keys
 
     def is_empty(self) -> bool:
