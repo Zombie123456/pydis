@@ -1,20 +1,12 @@
-from typing import Dict, Any, Optional, List, Tuple
-from datetime import datetime
+from typing import Any, Optional, List
 
-from .utils import SingletonType
+from .utils import SingletonType, Data
 from .value import Value
+from .exceptions import ExpiredError, NotFound
 
 
 class Pydis(metaclass=SingletonType):
-    _data: Dict[str, Value] = {}
-    """
-    这里我想的是
-    每一次 set 都加入到这个队列
-    clean 时从队头开始，对于每一个 key 都检查一遍是否超时
-    直到现在的 datetime > 队头的到期时间
-    但是 set 太多占用空间就会变大
-    """
-    _expire: List[Tuple[str, datetime]] = []
+    _data: Data[str, Value] = Data()
 
     def __init__(self, default_timeout: Optional[int] = None):
         """
@@ -22,30 +14,26 @@ class Pydis(metaclass=SingletonType):
         """
         self.default_timeout = default_timeout
 
-    def _clean(self) -> None:
-        while len(self._expire):
-            if (self._expire[0][1] - datetime.now()) >= 0:
-                self.ttl(self._expire[0][0])
-                self._expire.pop()
-            else:
-                break
+    def force_clean(self) -> None:
+        """
+        删除所有的keys，没有过期的key也会被删除，慎用
+        :return:
+        """
+        self._data.clear()
 
     def clean(self) -> None:
-        for key, value in self._data.items():
-            if value.is_expired():
-                self.delete(key)
+        """
+        删除已经过期的key
+        :return:
+        """
+        expired_keys = [key for key, value in self._data.items() if value.is_expired()]
+        _ = [self.delete(expired_key) for expired_key in expired_keys]
 
     def get(self, key: str) -> Any:
         try:
             value = self._data[key]
-        except KeyError:
+        except (NotFound, ExpiredError):
             return None
-
-        if value.is_expired():
-            self.delete(key)
-            # self.clean()
-            return None
-        # self.clean()
         return value.value
 
     def set_nx(self, key: str, value: Any, timeout: Optional[int] = None) -> bool:
@@ -65,8 +53,6 @@ class Pydis(metaclass=SingletonType):
         if timeout is None:
             timeout = self.default_timeout
         value = Value(value, timeout=timeout)
-        if not value.forever_key:
-            self._expire.append((key, value.expire_to))
         self._data[key] = value
 
     def delete(self, key: str) -> None:
@@ -80,18 +66,12 @@ class Pydis(metaclass=SingletonType):
         """
         try:
             value = self._data[key]
-        except KeyError:
-            return -2
-        if value.is_expired():
-            self.delete(key)
+        except (NotFound, ExpiredError):
             return -2
         return value.ttl()
 
     def _incr(self, key: str, amplitude: int, func: str) -> int:
-        try:
-            value = self._data[key]
-        except KeyError:
-            raise KeyError(f'key: {key} does not exists')
+        value = self._data[key]
         value.incr(amplitude, func)
         return value.value
 
@@ -102,10 +82,23 @@ class Pydis(metaclass=SingletonType):
         return self._incr(key, -amplitude, 'decr')
 
     def keys(self) -> List:
-        keys_dict: List = []
+        """
+        以列表形式返回所有的key
+        :return:
+        """
+        keys = []
+        expired_keys = []
         for key, value in self._data.items():
-            if not value.is_expired():
-                keys_dict.append(key)
+            if value.is_expired():
+                expired_keys.append(key)
             else:
-                self.delete(key)
-        return keys_dict
+                keys.append(key)
+
+        _ = [self.delete(expired_key) for expired_key in expired_keys]
+        return keys
+
+    def is_empty(self) -> bool:
+        return bool(self._data)
+
+    def __len__(self):
+        return len(self._data)

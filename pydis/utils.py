@@ -1,5 +1,7 @@
 import threading
 
+from .exceptions import NotFound, ExpiredError
+
 
 class SingletonType(type):
     _instance_lock = threading.Lock()
@@ -11,3 +13,15 @@ class SingletonType(type):
                 if cls._instance is None:
                     cls._instance = super().__call__(*args, **kwargs)
         return cls._instance
+
+
+class Data(dict):
+    def __getitem__(self, key):
+        try:
+            value = super().__getitem__(key)
+            if value.is_expired():
+                self.pop(key)
+                raise ExpiredError(key)
+        except KeyError:
+            raise NotFound(key)
+        return value
