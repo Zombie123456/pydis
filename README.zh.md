@@ -4,10 +4,10 @@
 
 [English](./README.md) | 简体中文
 
-Based on python's dict bottom layer, it implements management similar to redis interface
+基于 python 的字典实现了部分的 redis 接口
 
-If you want to manage memory like redis, but don't want to introduce as many services as redis, you can use pydis,
-Of course, pydis is completely implemented based on python's dict, and only has the basic functions of redis. Please evaluate this carefully before using it.
+如果你想像 redis 一样管理内存，但是不想引入 redis 那么重的服务，就可以使用 pydis
+开箱即用，不用依赖任何服务，python3.6+ 安装即可使用
 
 ## 安装
 
@@ -80,4 +80,31 @@ manager = Pydis()
 manager.set_nx('key1', 'value')
 manager.set_nx('key1', 'value1')
 manager.get('key1')  # value
+```
+
+### clean
+
+```python3
+from pydis import Pydis
+
+
+manager = Pydis()
+
+manager.set('key', 'value')
+manager.set('key1', 'value1', timeout=1)
+# after one seconds
+manager.clean() # only have key in pydis, key1 already deleted
+
+```
+
+### force_clean
+
+```python3
+from pydis import Pydis
+
+
+manager = Pydis()
+manager.set('key', 'value')
+manager.set('key1', 'value1', timeout=1)
+manager.force_clean()  # will delete all key
 ```
