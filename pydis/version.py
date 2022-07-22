@@ -1,2 +1,2 @@
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 CLIENT_VERSION = __version__
