@@ -92,7 +92,7 @@ class Pydis(metaclass=SingletonType):
             data[key] = Value(value, timeout)
         self._data.update(data)
 
-    def delete_many(self, keys: [str]) -> None:
+    def delete_many(self, keys: List[str]) -> None:
         _ = [self.delete(key) for key in keys]
 
     def keys(self) -> List:
