@@ -1,4 +1,5 @@
 import time
+import json
 from unittest import TestCase
 
 from pydis import Pydis
@@ -96,3 +97,12 @@ class TestCore(TestCase):
         p = Pydis()
         p.force_clean()
         self.assertEqual(len(p), 0)
+
+    def test_save(self):
+        p = Pydis()
+        p.force_clean()
+        p.set('a', 1)
+        p.save('test_save.json')
+        with open('test_save.json', 'r') as f:
+            self.assertEqual(json.load(f)['a'], 1)
+
