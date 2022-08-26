@@ -36,6 +36,8 @@ class Pydis(metaclass=SingletonType):
             return None
         return value.value
 
+    __getitem__ = get
+
     def set_nx(self, key: str, value: Any, timeout: Optional[int] = None) -> bool:
         """
         没有key的时候设置key，返回True
@@ -55,11 +57,15 @@ class Pydis(metaclass=SingletonType):
         value = Value(value, timeout=timeout)
         self._data[key] = value
 
+    __setitem__ = _set
+
     def delete(self, key: str) -> None:
         try:
             del self._data[key]
         except (NotFound, ExpiredError):
             return None
+
+    __delitem__ = delete
 
     def ttl(self, key: str) -> int:
         """
@@ -116,3 +122,8 @@ class Pydis(metaclass=SingletonType):
 
     def __len__(self) -> int:
         return len(self._data)
+
+    __contains__ = _data.__contains__
+
+    def __iter__(self):
+        return self._data
