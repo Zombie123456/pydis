@@ -96,3 +96,17 @@ class TestCore(TestCase):
         p = Pydis()
         p.force_clean()
         self.assertEqual(len(p), 0)
+
+    def test_container(self):
+        p = Pydis()
+        p.force_clean()
+        test_data = {'o': 1, 'l':23, '?':443, '`': 8}
+        p.set_many(test_data)
+        for k, v in enumerate(p):
+            self.assertEqual(test_data[k], v)
+            self.assertEqual(p[k], v)
+            self.asserIn(k, p)
+        p['o'] = 33
+        self.assertEqual(p['o'], 33)
+        del p['?']
+        self.assertNotIn('?', p)
