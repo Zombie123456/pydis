@@ -1,3 +1,4 @@
+import json
 from typing import Any, Optional, List
 
 from .utils import SingletonType, Data
@@ -35,6 +36,17 @@ class Pydis(metaclass=SingletonType):
         except (NotFound, ExpiredError):
             return None
         return value.value
+
+    def save(self, path: str) -> None:
+        kv = {}
+        for key in self.keys():
+            try:
+                kv[key] = self.get(key)
+            except (NotFound, ExpiredError):
+                pass
+        with open(path, 'w') as f:
+            json.dump(f)
+
 
     def set_nx(self, key: str, value: Any, timeout: Optional[int] = None) -> bool:
         """
