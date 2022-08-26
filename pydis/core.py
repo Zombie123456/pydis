@@ -37,17 +37,6 @@ class Pydis(metaclass=SingletonType):
             return None
         return value.value
 
-    def save(self, path: str) -> None:
-        kv = {}
-        for key in self.keys():
-            try:
-                kv[key] = self.get(key)
-            except (NotFound, ExpiredError):
-                pass
-        with open(path, 'w') as f:
-            json.dump(f)
-
-
     def set_nx(self, key: str, value: Any, timeout: Optional[int] = None) -> bool:
         """
         没有key的时候设置key，返回True
@@ -128,3 +117,13 @@ class Pydis(metaclass=SingletonType):
 
     def __len__(self) -> int:
         return len(self._data)
+
+    def save(self, path: str) -> None:
+        kv = {}
+        for key in self.keys():
+            try:
+                kv[key] = self.get(key)
+            except (NotFound, ExpiredError):
+                pass
+        with open(path, 'w') as f:
+            json.dump(kv, f)
