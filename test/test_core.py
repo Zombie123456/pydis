@@ -98,11 +98,26 @@ class TestCore(TestCase):
         p.force_clean()
         self.assertEqual(len(p), 0)
 
-    def test_save(self):
+    def test_save_load(self):
+        class TestSaveLoadClass(object):
+            @staticmethod
+            def foo(bar):
+                return bar
+
         p = Pydis()
+        # Save
         p.force_clean()
         p.set('a', 1)
-        p.save('test_save.json')
-        with open('test_save.json', 'r') as f:
-            self.assertEqual(json.load(f)['a'], 1)
-
+        p.set('b', TestSaveLoadClass)
+        p.save('test_save_load.pkl')
+        # Load
+        p.force_clean()
+        p.load('test_save_load.pkl')
+        self.assertEqual(p.get('a'), 1)
+        self.assertEqual(p.get('b').foo(1), 1)
+        # Load (nx=True)
+        p.force_clean()
+        p.set('a', 2)
+        p.load('test_save_load.pkl', nx=True)
+        self.assertEqual(p.get('a'), 2)
+        self.assertEqual(p.get('b').foo(1), 1)

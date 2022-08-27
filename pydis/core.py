@@ -1,4 +1,4 @@
-import json
+import pickle
 from typing import Any, Optional, List
 
 from .utils import SingletonType, Data
@@ -126,4 +126,13 @@ class Pydis(metaclass=SingletonType):
             except (NotFound, ExpiredError):
                 pass
         with open(path, 'w') as f:
-            json.dump(kv, f)
+            pickle.dump(kv, f)
+
+    def load(self, path: str, nx: bool = False) -> None:
+        with open(path, 'r') as f:
+            obj = pickle.load(f)
+            for key in obj.keys():
+                if nx:
+                    self.set_nx(key, obj[key])
+                else:
+                    self.set(key, obj[key])
