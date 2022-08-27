@@ -125,11 +125,11 @@ class Pydis(metaclass=SingletonType):
                 kv[key] = self.get(key)
             except (NotFound, ExpiredError):
                 pass
-        with open(path, 'w') as f:
+        with open(path, 'wb') as f:
             pickle.dump(kv, f)
 
     def load(self, path: str, nx: bool = False) -> None:
-        with open(path, 'r') as f:
+        with open(path, 'rb') as f:
             obj = pickle.load(f)
             for key in obj.keys():
                 if nx:
