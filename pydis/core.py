@@ -1,3 +1,4 @@
+import pickle
 from typing import Any, Optional, List
 
 from .utils import SingletonType, Data
@@ -116,3 +117,22 @@ class Pydis(metaclass=SingletonType):
 
     def __len__(self) -> int:
         return len(self._data)
+
+    def save(self, path: str) -> None:
+        kv = {}
+        for key in self.keys():
+            try:
+                kv[key] = self._data[key].value
+            except (NotFound, ExpiredError):
+                pass
+        with open(path, 'wb') as f:
+            pickle.dump(kv, f)
+
+    def load(self, path: str, nx: bool = False) -> None:
+        with open(path, 'rb') as f:
+            obj = pickle.load(f)
+            for key in obj.keys():
+                if nx:
+                    self.set_nx(key, obj[key])
+                else:
+                    self.set(key, obj[key])

@@ -1,9 +1,13 @@
 import time
+import json
 from unittest import TestCase
 
 from pydis import Pydis
 from pydis.exceptions import NotFound
 
+
+def foo(bar):
+            return bar
 
 class TestCore(TestCase):
     def test_set_get(self):
@@ -96,3 +100,22 @@ class TestCore(TestCase):
         p = Pydis()
         p.force_clean()
         self.assertEqual(len(p), 0)
+
+    def test_save_load(self):
+        p = Pydis()
+        # Save
+        p.force_clean()
+        p.set('a', 1)
+        p.set('b', foo)
+        p.save('test_save_load.pkl')
+        # Load
+        p.force_clean()
+        p.load('test_save_load.pkl')
+        self.assertEqual(p.get('a'), 1)
+        self.assertEqual(p.get('b')(1), 1)
+        # Load (nx=True)
+        p.force_clean()
+        p.set('a', 2)
+        p.load('test_save_load.pkl', nx=True)
+        self.assertEqual(p.get('a'), 2)
+        self.assertEqual(p.get('b')(1), 1)
