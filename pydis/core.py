@@ -122,7 +122,7 @@ class Pydis(metaclass=SingletonType):
         kv = {}
         for key in self.keys():
             try:
-                kv[key] = self.get(key)
+                kv[key] = self._data[key].value
             except (NotFound, ExpiredError):
                 pass
         with open(path, 'wb') as f:
