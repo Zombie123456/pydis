@@ -119,3 +119,6 @@ class TestCore(TestCase):
         p.load('test_save_load.pkl', nx=True)
         self.assertEqual(p.get('a'), 2)
         self.assertEqual(p.get('b')(1), 1)
+
+    def tearDown(self):
+        Pydis._instance = None
