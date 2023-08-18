@@ -1,19 +1,32 @@
 import pickle
+import threading
+import time
 from typing import Any, Optional, List
 
 from .utils import SingletonType, Data
 from .value import Value
-from .exceptions import ExpiredError, NotFound
+from .exceptions import ExpiredError, NotFound, NoConfigKeyError
+
+
+class Config(metaclass=SingletonType):
+    # 全局的timeout，如果在设置key没有指定timeout的话，就会应用该timeout
+    default_timeout: Optional[int] = None
+
+    config_keys = ['default_timeout']
+
+    @classmethod
+    def set_config(cls, key, value):
+        if key not in cls.config_keys:
+            raise NoConfigKeyError(key)
+        setattr(cls, key, value)
 
 
 class Pydis(metaclass=SingletonType):
     _data: Data[str, Value] = Data()
+    config = Config()
 
-    def __init__(self, default_timeout: Optional[int] = None):
-        """
-        :param default_timeout: 全局的timeout，如果在设置key没有指定timeout的话，就会应用该timeout
-        """
-        self.default_timeout = default_timeout
+    def set_config(self, key, value):
+        self.config.set_config(key, value)
 
     def force_clean(self) -> None:
         """
@@ -52,7 +65,7 @@ class Pydis(metaclass=SingletonType):
 
     def _set(self, key: str, value: Any, timeout: Optional[int] = None) -> None:
         if timeout is None:
-            timeout = self.default_timeout
+            timeout = self.config.default_timeout
         value = Value(value, timeout=timeout)
         self._data[key] = value
 
@@ -87,7 +100,7 @@ class Pydis(metaclass=SingletonType):
 
     def set_many(self, data: dict, timeout: Optional[int] = None) -> None:
         if timeout is None:
-            timeout = self.default_timeout
+            timeout = self.config.default_timeout
 
         for key, value in data.items():
             data[key] = Value(value, timeout)
@@ -95,6 +108,9 @@ class Pydis(metaclass=SingletonType):
 
     def delete_many(self, keys: List[str]) -> None:
         _ = [self.delete(key) for key in keys]
+
+    def size(self) -> int:
+        return len(self._data)
 
     def keys(self) -> List:
         """
