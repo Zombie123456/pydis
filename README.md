@@ -17,15 +17,20 @@ pip install pydictdis
 
 ## Usage
 
-params
+### config
 
-- default_timeout : global timeout
+```python3
+from pydis import Pydis
+
+manager = Pydis()
+
+manager.set_config("default_timeout", 50) # set default timeout is 50 seconds
+```
 
 ### simple usage
 
 ```python3
 from pydis import Pydis
-
 
 manager = Pydis()
 

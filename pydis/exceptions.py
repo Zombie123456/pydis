@@ -18,3 +18,10 @@ class NotFound(PydisError):
 
 class ExpiredError(NotFound):
     detail = 'Key : `%s` already expired and deleted.'
+
+
+class NoConfigKeyError(PydisError):
+    detail = 'Config key: `%s` not exists.'
+
+    def __init__(self, key):
+        self.detail = self.detail % key

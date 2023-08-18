@@ -1,5 +1,4 @@
 import time
-import json
 from unittest import TestCase
 
 from pydis import Pydis
@@ -7,7 +6,8 @@ from pydis.exceptions import NotFound
 
 
 def foo(bar):
-            return bar
+    return bar
+
 
 class TestCore(TestCase):
     def test_set_get(self):
